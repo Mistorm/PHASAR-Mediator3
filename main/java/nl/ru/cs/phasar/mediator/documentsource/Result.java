@@ -36,16 +36,18 @@ public class Result {
         return triples;
     }
 
-    public List<Triple> matchTriple(Triple triple) {
-        List<Triple> matches = new ArrayList<Triple>();
+    public boolean matchTriple(Triple triple) {
+        Boolean match = false;
 
-        for (Triple t : triples) {
-            if (t.match(triple)) {
-                matches.add(t);
+        //while (match == false) {
+            for (Triple t : triples) {
+                if (t.match(triple)) {
+                    match = true;
+                }
             }
-        }
+        //}
 
-        return matches;
+        return match;
     }
 
     public JSONObject getJSONObject() throws JSONException {

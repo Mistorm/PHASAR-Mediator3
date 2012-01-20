@@ -20,12 +20,12 @@ import nl.ru.cs.phasar.mediator.userquery.Metadata;
 public class FlatSource implements DocumentSource {
 
     private static final String FILEPATH = "/home/mistorm/workspaces/netbeans/Mediator3/src/main/resources/examplesents.txt";
-    private List<Result> sents;
+    private List<Result> resultList;
     private char newChar;
 
     public FlatSource() {
 
-        this.sents = new ArrayList<Result>();
+        this.resultList = new ArrayList<Result>();
 
         try {
             parseFile(FILEPATH);
@@ -38,7 +38,7 @@ public class FlatSource implements DocumentSource {
     private void parseFile(String filePath) throws FileNotFoundException {
 
         String line = null;
-        Result currentSent = null;
+        Result currentResult = null;
         String[] currentTriple = null;
 
         File file = new File(filePath);
@@ -58,13 +58,13 @@ public class FlatSource implements DocumentSource {
                     currentTriple[i] = currentTriple[i].trim();
                 }
 
-                currentSent.addTriple(new Triple(currentTriple));
+                currentResult.addTriple(new Triple(currentTriple));
             } //No [, so it must be a sentece.
             else {
-                if (currentSent != null) {
-                    sents.add(currentSent);
+                if (currentResult != null) {
+                    resultList.add(currentResult);
                 }
-                currentSent = new Result(line);
+                currentResult = new Result(line);
             }
 
             line = null;
@@ -72,28 +72,31 @@ public class FlatSource implements DocumentSource {
     }
 
     @Override
-    public List<Hit> getDocuments(Metadata metadata, List<Triple> triples) {
+    public List<Result> getDocuments(Metadata metadata, List<Triple> triples) {
 
-        List<Triple> matches = new ArrayList<Triple>();
-        List<Hit> hitList = new ArrayList<Hit>();
+        List<Result> resultList = new ArrayList<Result>();
 
         //Searching without the triple(s) to find is imposible
         if (triples.isEmpty()) {
-            return hitList;
+            return resultList;
         }
 
-        for (Result sent : sents) {
-            matches = new ArrayList<Triple>();
-            for (Triple triple : triples) {
-                matches.addAll(sent.matchTriple(triple));
+        boolean match = true;
+
+        for (Result r : this.resultList) {
+            for (Triple t : triples) {
+                if (r.matchTriple(t) == false) {
+                    match = false;
+                }
             }
-            if (matches.size() >= triples.size()) {
-                hitList.add(new Hit(sent, matches));
+            if (match == true) {
+                resultList.add(r);
             }
+            match = true;
         }
 
-        System.out.println("Nr. of sents found: " + hitList.size());
+        System.out.println("Nr. of sents found: " + resultList.size());
 
-        return hitList;
+        return resultList;
     }
 }

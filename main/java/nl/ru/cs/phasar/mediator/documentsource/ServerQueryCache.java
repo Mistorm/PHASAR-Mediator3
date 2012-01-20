@@ -16,22 +16,22 @@ public class ServerQueryCache implements DocumentSource {
     }
 
     @Override
-    public List<Hit> getDocuments(Metadata metadata, List<Triple> triples) {
+    public List<Result> getDocuments(Metadata metadata, List<Triple> triples) {
 
-        List<Hit> hitlist = this.findInCache(metadata, triples);
+        List<Result> resultList = this.findInCache(metadata, triples);
 
-        if (hitlist == null) {
-            hitlist = source.getDocuments(metadata, triples);
-            this.addToCache(metadata, triples, hitlist);
+        if (resultList == null) {
+            resultList = source.getDocuments(metadata, triples);
+            this.addToCache(metadata, triples, resultList);
         }
 
-        return hitlist;
+        return resultList;
     }
 
-    private List<Hit> findInCache(Metadata metadata, List<Triple> triples) {
+    private List<Result> findInCache(Metadata metadata, List<Triple> triples) {
         return null;
     }
 
-    private void addToCache(Metadata metadata, List triples, List<Hit> result) {
+    private void addToCache(Metadata metadata, List triples, List<Result> result) {
     }
 }

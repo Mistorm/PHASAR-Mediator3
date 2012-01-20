@@ -27,29 +27,40 @@ public class ArrowSuggestionResource extends AbstractSuggestionResource {
 
     @POST
     @Produces("application/json")
-    public Response getSuggestion(String json) {
+    public Response getSuggestion(String json) throws JSONException {
 
-        List<Hit> newHits = new ArrayList<Hit>();
-        try {
-            newHits = super.getNewHits(json);
-        }
-        catch (JSONException ex) {
-            Logger.getLogger(ArrowSuggestionResource.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        List<Hit> newHits = new ArrayList<Hit>();
+//        try {
+//            newHits = super.getNewHits(json);
+//        }
+//        catch (JSONException ex) {
+//            Logger.getLogger(ArrowSuggestionResource.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//
+//        HashSet<String> arrowSuggestions = new HashSet<String>();
+//
+//        for (Hit h : newHits) {
+//            for (Triple t : h.getMatches()) {
+//                arrowSuggestions.add(t.getRelator());
+//            }
+//        }
+//
+//        JSONArray array = new JSONArray(arrowSuggestions);
+//
+//        System.out.println("Arrow Suggestion array: " + array.toString());
+//
+//        return Response.ok(array.toString()).header("Access-Control-Allow-Origin", "*").build();
+        
+        
+        String[] demo = new String[3];
+        demo[0] = "SUBJ";
+        demo[1] = "OBJ";
+        demo[2] = "AUX";
+        
+        JSONArray suggestions = new JSONArray(demo);
+       
+        return Response.ok(suggestions.toString()).header("Access-Control-Allow-Origin", "*").build();
 
-
-        HashSet<String> arrowSuggestions = new HashSet<String>();
-
-        for (Hit h : newHits) {
-            for (Triple t : h.getMatches()) {
-                arrowSuggestions.add(t.getRelator());
-            }
-        }
-
-        JSONArray array = new JSONArray(arrowSuggestions);
-
-        System.out.println("Arrow Suggestion array: " + array.toString());
-
-        return Response.ok(array.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
 }

@@ -28,37 +28,37 @@ public abstract class AbstractSuggestionResource {
         cache = new UserQueryCache(documentSource);
     }
 
-    protected List<Hit> getNewHits(String json) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(json);
-        JSONObject baseJson = jsonObject.optJSONObject("baseQuery");
-        JSONObject extendedJson = jsonObject.optJSONObject("extendedQuery");
-
-        Date year = new Date();
-        String matchingType = "";
-        String browsingType = "sentence";
-
-        Metadata metadata = new Metadata(year, matchingType, browsingType);
-
-        //System.out.println(baseQuery.optJSONArray("boxes").toString());
-        Query baseQuery = cache.getQuery(metadata, baseJson.toString());
-        Query extendedQuery = cache.getQuery(metadata, extendedJson.toString());
-
-        System.out.println("baseQuery result: " + baseQuery.getJSONResult());
-        System.out.println("extendedQuery result: " + extendedQuery.getJSONResult());
-
-        List<Hit> baseHits = baseQuery.getHitlist();
-        List<Hit> extendedHits = extendedQuery.getHitlist();
-        List<Hit> newHits = new ArrayList<Hit>();
-
-        for (Hit h : extendedHits) {
-            if (!baseHits.contains(h)) {
-                newHits.add(h);
-            }
-        }
-
-        System.out.println("New hits: " + newHits.size());
-
-       return newHits;
-    }
+//    protected List<Hit> getNewHits(String json) throws JSONException {
+//
+//        JSONObject jsonObject = new JSONObject(json);
+//        JSONObject baseJson = jsonObject.optJSONObject("baseQuery");
+//        JSONObject extendedJson = jsonObject.optJSONObject("extendedQuery");
+//
+//        Date year = new Date();
+//        String matchingType = "";
+//        String browsingType = "sentence";
+//
+//        Metadata metadata = new Metadata(year, matchingType, browsingType);
+//
+//        //System.out.println(baseQuery.optJSONArray("boxes").toString());
+//        Query baseQuery = cache.getQuery(metadata, baseJson.toString());
+//        Query extendedQuery = cache.getQuery(metadata, extendedJson.toString());
+//
+//        System.out.println("baseQuery result: " + baseQuery.getJSONResult());
+//        System.out.println("extendedQuery result: " + extendedQuery.getJSONResult());
+//
+//        List<Hit> baseHits = baseQuery.getHitlist();
+//        List<Hit> extendedHits = extendedQuery.getHitlist();
+//        List<Hit> newHits = new ArrayList<Hit>();
+//
+//        for (Hit h : extendedHits) {
+//            if (!baseHits.contains(h)) {
+//                newHits.add(h);
+//            }
+//        }
+//
+//        System.out.println("New hits: " + newHits.size());
+//
+//       return newHits;
+//    }
 }

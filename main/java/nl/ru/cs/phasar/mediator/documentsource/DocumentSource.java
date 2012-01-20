@@ -9,5 +9,5 @@ import nl.ru.cs.phasar.mediator.userquery.Metadata;
  */
 public interface DocumentSource {
 
-    public List<Hit> getDocuments(Metadata metadata, List<Triple> triples);
+    public List<Result> getDocuments(Metadata metadata, List<Triple> triples);
 }
