@@ -1,6 +1,7 @@
 package nl.ru.cs.phasar.mediator.userquery;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import nl.ru.cs.phasar.mediator.documentsource.DocumentSource;
@@ -77,8 +78,9 @@ public class Query {
      * @param position
      * @return 
      */
-    public List<String> getSuggestion(Triple triple, String position) {
-        return buildList(matchTriples(triple), position);
+    public HashMap<String, Integer> getSuggestion(Triple triple, String position) {
+        List<Triple> matches = matchTriples(triple);
+        return buildList(matches, position);
     }
 
     /**
@@ -107,24 +109,31 @@ public class Query {
      * @param position Possible values are a (head) relator of b(tail)
      * @return 
      */
-    private List<String> buildList(List<Triple> matches, String position) {
+    private HashMap<String, Integer> buildList(List<Triple> matches, String position) {
 
-        List<String> list = new ArrayList<String>();
+        HashMap<String, Integer> count = new HashMap();
 
-        if (position.equals("a")) {
-            for (Triple t : matches) {
-                list.add(t.getGroundA());
+        for (Triple t : matches) {
+            String value = "";
+            if (position.equals("a")) {
+                value = t.getGroundA();
+            } else if (position.equals(
+                    "relator")) {
+                value = t.getRelator();
+            } else if (position.equals(
+                    "b")) {
+                value = t.getGroundB();
             }
-        } else if (position.equals("relator")) {
-            for (Triple t : matches) {
-                list.add(t.getRelator());
-            }
-        } else if (position.equals("b")) {
-            for (Triple t : matches) {
-                list.add(t.getGroundB());
+
+            if (count.containsKey(value)) {
+                Integer newValue = count.get(value);
+                newValue++;
+                count.put(value, newValue);
+            } else {
+                count.put(value, 1);
             }
         }
 
-        return list;
+        return count;
     }
 }

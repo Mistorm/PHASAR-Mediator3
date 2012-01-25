@@ -28,6 +28,20 @@ public abstract class AbstractSuggestionResource {
         cache = new UserQueryCache(documentSource);
     }
 
+    protected Query getResult(String json){
+    
+        Date year = new Date();
+        String matchingType = "";
+        String browsingType = "sentence";
+
+        Metadata metadata = new Metadata(year, matchingType, browsingType);
+    
+        Query query = cache.getQuery(metadata, json);
+        
+        return query;
+        
+    }
+    
 //    protected List<Hit> getNewHits(String json) throws JSONException {
 //
 //        JSONObject jsonObject = new JSONObject(json);

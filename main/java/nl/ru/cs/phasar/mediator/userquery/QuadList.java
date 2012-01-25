@@ -73,9 +73,9 @@ public class QuadList {
             boxes.put(jsonObject.optInt("nr"), jsonObject.optString("content"));
         } else if (relator && direction) { //Only arrows have relators & directions
             Quad quad = new Quad(
-                    jsonObject.optInt("boxA"),
+                    jsonObject.optInt("a"),
                     jsonObject.optString("relator"),
-                    jsonObject.optInt("boxB"),
+                    jsonObject.optInt("b"),
                     jsonObject.optInt("direction"));
             quads.add(quad);
         }

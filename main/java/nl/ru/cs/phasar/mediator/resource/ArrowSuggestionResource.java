@@ -1,18 +1,15 @@
 package nl.ru.cs.phasar.mediator.resource;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Set;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
-import org.json.JSONArray;
+import nl.ru.cs.phasar.mediator.userquery.Query;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -29,38 +26,40 @@ public class ArrowSuggestionResource extends AbstractSuggestionResource {
     @Produces("application/json")
     public Response getSuggestion(String json) throws JSONException {
 
-//        List<Hit> newHits = new ArrayList<Hit>();
-//        try {
-//            newHits = super.getNewHits(json);
-//        }
-//        catch (JSONException ex) {
-//            Logger.getLogger(ArrowSuggestionResource.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//
-//        HashSet<String> arrowSuggestions = new HashSet<String>();
-//
-//        for (Hit h : newHits) {
-//            for (Triple t : h.getMatches()) {
-//                arrowSuggestions.add(t.getRelator());
-//            }
-//        }
-//
-//        JSONArray array = new JSONArray(arrowSuggestions);
-//
-//        System.out.println("Arrow Suggestion array: " + array.toString());
-//
-//        return Response.ok(array.toString()).header("Access-Control-Allow-Origin", "*").build();
-        
-        
-        String[] demo = new String[3];
-        demo[0] = "SUBJ";
-        demo[1] = "OBJ";
-        demo[2] = "AUX";
-        
-        JSONArray suggestions = new JSONArray(demo);
-       
-        return Response.ok(suggestions.toString()).header("Access-Control-Allow-Origin", "*").build();
+        JSONObject object = new JSONObject(json);
+        JSONObject baseQuery = object.getJSONObject("baseQuery");
+        JSONObject extention = object.getJSONObject("extension");
 
+        System.out.println("baseQuery:" + baseQuery.toString());
+        System.out.println("extention:" + extention.toString());
+
+        Query query = super.getResult(baseQuery.toString());
+
+        Triple triple = new Triple(extention.getString("a"), extention.getString("relator"), extention.getString("b"), extention.getString("direction"));
+
+        HashMap<String, Integer> count = query.getSuggestion(triple, "relator");
+
+        JSONObject returned = new JSONObject();
+
+        Set<String> keys = count.keySet();
+
+        JSONObject suggestion = new JSONObject();
+
+        suggestion = new JSONObject();
+        suggestion.put("value", "*");
+        suggestion.put("count", "*");
+        System.out.println(suggestion.toString());
+        returned.append("suggestion", suggestion);
+
+        for (String key : keys) {
+            suggestion = new JSONObject();
+            suggestion.put("value", key);
+            suggestion.put("count", count.get(key));
+            returned.append("suggestion", suggestion);
+        }
+
+        System.out.println("Response: " + returned.toString());
+
+        return Response.ok(returned.toString()).header("Access-Control-Allow-Origin", "*").build();
     }
 }
