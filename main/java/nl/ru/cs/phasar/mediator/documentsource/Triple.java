@@ -30,7 +30,8 @@ public class Triple {
      */
     public Triple(String[] string) {
         if (string.length != 3) {
-            throw new IllegalArgumentException("Argument has lenght" + string.length + " , lenght should be 3.");
+            //throw new IllegalArgumentException("Argument has lenght" + string.length + " , lenght should be 3.");
+            System.out.println("Warning: argument has lenght " + string.length + " , lenght should be 3");
         } else {
             a = string[0];
             relator = string[1];

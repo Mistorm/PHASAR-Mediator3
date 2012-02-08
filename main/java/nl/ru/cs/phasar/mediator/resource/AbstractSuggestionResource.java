@@ -1,11 +1,18 @@
 package nl.ru.cs.phasar.mediator.resource;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.ru.cs.phasar.mediator.documentsource.DocumentSource;
 import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.ServerQueryCache;
+import nl.ru.cs.phasar.mediator.documentsource.ServerQueryResolver;
 import nl.ru.cs.phasar.mediator.documentsource.flatfile.FlatSource;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
 import nl.ru.cs.phasar.mediator.userquery.Query;
@@ -21,58 +28,41 @@ public abstract class AbstractSuggestionResource {
 
     private DocumentSource documentSource;
     private UserQueryCache cache;
+    private static String PROPERTIES_FILE = "mediator.properties";
 
     public AbstractSuggestionResource() {
-        documentSource = new ServerQueryCache(new FlatSource());
-        //documentSource =  new ServerQueryCache(new ServerQueryResolver());
+
+        URL url = MediatorResource.class.getProtectionDomain().getCodeSource().getLocation();
+
+        Properties configFile = new Properties();
+        try {
+            configFile.load(new FileReader(url.getPath() + PROPERTIES_FILE));
+        }
+        catch (IOException ex) {
+            Logger.getLogger(MediatorResource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //Caveat: configFile.getProperty() only returns String, that explains this code
+        if (configFile.getProperty("INTERNAL_DOCSOURCE", "true").equals("true")) {
+            documentSource = new ServerQueryCache(new FlatSource());
+        } else {
+            documentSource = new ServerQueryCache(new ServerQueryResolver());
+        }
+
         cache = new UserQueryCache(documentSource);
     }
 
-    protected Query getResult(String json){
-    
+    protected Query getResult(String json) {
+
         Date year = new Date();
         String matchingType = "";
         String browsingType = "sentence";
 
         Metadata metadata = new Metadata(year, matchingType, browsingType);
-    
+
         Query query = cache.getQuery(metadata, json);
-        
+
         return query;
-        
+
     }
-    
-//    protected List<Hit> getNewHits(String json) throws JSONException {
-//
-//        JSONObject jsonObject = new JSONObject(json);
-//        JSONObject baseJson = jsonObject.optJSONObject("baseQuery");
-//        JSONObject extendedJson = jsonObject.optJSONObject("extendedQuery");
-//
-//        Date year = new Date();
-//        String matchingType = "";
-//        String browsingType = "sentence";
-//
-//        Metadata metadata = new Metadata(year, matchingType, browsingType);
-//
-//        //System.out.println(baseQuery.optJSONArray("boxes").toString());
-//        Query baseQuery = cache.getQuery(metadata, baseJson.toString());
-//        Query extendedQuery = cache.getQuery(metadata, extendedJson.toString());
-//
-//        System.out.println("baseQuery result: " + baseQuery.getJSONResult());
-//        System.out.println("extendedQuery result: " + extendedQuery.getJSONResult());
-//
-//        List<Hit> baseHits = baseQuery.getHitlist();
-//        List<Hit> extendedHits = extendedQuery.getHitlist();
-//        List<Hit> newHits = new ArrayList<Hit>();
-//
-//        for (Hit h : extendedHits) {
-//            if (!baseHits.contains(h)) {
-//                newHits.add(h);
-//            }
-//        }
-//
-//        System.out.println("New hits: " + newHits.size());
-//
-//       return newHits;
-//    }
 }

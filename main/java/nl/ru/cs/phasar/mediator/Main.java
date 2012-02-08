@@ -3,17 +3,34 @@ package nl.ru.cs.phasar.mediator;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import java.io.FileReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.util.Properties;
 
 public class Main {
 
+    private static String PROPERTIES_FILE = "mediator.properties";
+
     private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://localhost/").port(9998).build();
-        //return UriBuilder.fromUri("http://192.168.1.101").port(9998).build();
+
+        URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
+
+        Properties configFile = new Properties();
+        try {
+            configFile.load(new FileReader(url.getPath() + PROPERTIES_FILE));
+        }
+        catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return UriBuilder.fromUri(configFile.getProperty("FROM_URI")).port(Integer.parseInt(configFile.getProperty("PORT"))).build();
     }
     public static final URI BASE_URI = getBaseURI();
 

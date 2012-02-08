@@ -20,6 +20,7 @@ import nl.ru.cs.phasar.mediator.userquery.Metadata;
 public class FlatSource implements DocumentSource {
 
     private static final String FILEPATH = "/home/mistorm/workspaces/netbeans/Mediator3/src/main/resources/examplesents.txt";
+    //private static final String FILEPATH = "/home/mistorm/workspaces/netbeans/Mediator3/src/main/resources/nrcsents.txt";
     private List<Result> resultList;
     private char newChar;
 
