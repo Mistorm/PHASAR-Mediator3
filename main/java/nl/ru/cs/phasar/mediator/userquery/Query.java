@@ -1,11 +1,10 @@
 package nl.ru.cs.phasar.mediator.userquery;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import nl.ru.cs.phasar.mediator.documentsource.DocumentSource;
-import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.Result;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
 import org.json.JSONException;
@@ -78,7 +77,7 @@ public class Query {
      * @param position
      * @return 
      */
-    public HashMap<String, Integer> getSuggestion(Triple triple, String position) {
+    public List<SuggestionItem> getSuggestion(Triple triple, String position) {
         List<Triple> matches = matchTriples(triple);
         return buildList(matches, position);
     }
@@ -109,31 +108,40 @@ public class Query {
      * @param position Possible values are a (head) relator of b(tail)
      * @return 
      */
-    private HashMap<String, Integer> buildList(List<Triple> matches, String position) {
+    private List<SuggestionItem> buildList(List<Triple> matches, String position) {
 
-        HashMap<String, Integer> count = new HashMap();
+        ArrayList<SuggestionItem> suggestionList = new ArrayList<SuggestionItem>();
 
         for (Triple t : matches) {
             String value = "";
             if (position.equals("a")) {
-                value = t.getGroundA();
+                value = t.getGroundHead();
             } else if (position.equals(
                     "relator")) {
                 value = t.getRelator();
             } else if (position.equals(
                     "b")) {
-                value = t.getGroundB();
+                value = t.getGroundTail();
             }
 
-            if (count.containsKey(value)) {
-                Integer newValue = count.get(value);
-                newValue++;
-                count.put(value, newValue);
-            } else {
-                count.put(value, 1);
+            SuggestionItem newItem = new SuggestionItem(value, 1);
+
+            for (SuggestionItem item : suggestionList) {
+                if (item.getKey().equals(value)) {
+                    item.incrementCount();
+                    value = null;
+                    break;
+                }
+            }
+
+            if (value != null) {
+                suggestionList.add(newItem);
             }
         }
 
-        return count;
+        Collections.sort(suggestionList);
+        Collections.reverse(suggestionList);
+
+        return suggestionList;
     }
 }

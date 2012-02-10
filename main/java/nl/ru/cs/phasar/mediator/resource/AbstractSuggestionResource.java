@@ -3,22 +3,17 @@ package nl.ru.cs.phasar.mediator.resource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.ru.cs.phasar.mediator.documentsource.DocumentSource;
-import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.ServerQueryCache;
 import nl.ru.cs.phasar.mediator.documentsource.ServerQueryResolver;
 import nl.ru.cs.phasar.mediator.documentsource.flatfile.FlatSource;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
 import nl.ru.cs.phasar.mediator.userquery.Query;
 import nl.ru.cs.phasar.mediator.userquery.UserQueryCache;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *
@@ -29,6 +24,7 @@ public abstract class AbstractSuggestionResource {
     private DocumentSource documentSource;
     private UserQueryCache cache;
     private static String PROPERTIES_FILE = "mediator.properties";
+    public static String WILDCARD = "*";
 
     public AbstractSuggestionResource() {
 

@@ -1,17 +1,13 @@
 package nl.ru.cs.phasar.mediator.resource;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
 import nl.ru.cs.phasar.mediator.userquery.Query;
-import org.json.JSONArray;
+import nl.ru.cs.phasar.mediator.userquery.SuggestionItem;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,38 +25,39 @@ public class BoxSuggestionResource extends AbstractSuggestionResource {
     @POST
     @Produces("application/json")
     public Response getSuggestion(String json) throws JSONException {
-
-
-        JSONObject object = new JSONObject(json);
-        JSONObject baseQuery = object.getJSONObject("baseQuery");
-        JSONObject extention = object.getJSONObject("extension");
+        
+        //Get & resolve the query
+        JSONObject suggestionRequest = new JSONObject(json);
+        JSONObject baseQuery = suggestionRequest.getJSONObject("baseQuery");
+        JSONObject extention = suggestionRequest.getJSONObject("extension");
 
         Query query = super.getResult(baseQuery.toString());
 
         Triple triple = new Triple(extention.getString("a"), extention.getString("relator"), extention.getString("b"), extention.getString("direction"));
 
-        HashMap<String, Integer> count;
-        if (triple.getGroundA().equals("*")) {
-            count = query.getSuggestion(triple, "a");
+        //Count the terms
+        List<SuggestionItem> SuggestionList;
+        if (triple.getGroundHead().equals(WILDCARD)) {
+            SuggestionList = query.getSuggestion(triple, "a");
         } else {
-            count = query.getSuggestion(triple, "b");
+            SuggestionList = query.getSuggestion(triple, "b");
         }
-
+        
+        //Build the JSON answer
         JSONObject returned = new JSONObject();
-
-        Set<String> keys = count.keySet();
 
         JSONObject suggestion = new JSONObject();
 
+        //Make sure the wildcard suggestion is send first
         suggestion = new JSONObject();
-        suggestion.put("value", "*");
-        suggestion.put("count", "*");
+        suggestion.put("value", WILDCARD);
+        suggestion.put("count", WILDCARD);
         returned.append("suggestion", suggestion);
 
-        for (String key : keys) {
+        for (SuggestionItem item : SuggestionList) {
             suggestion = new JSONObject();
-            suggestion.put("value", key);
-            suggestion.put("count", count.get(key));
+            suggestion.put("value", item.getKey());
+            suggestion.put("count", item.getCount());
             returned.append("suggestion", suggestion);
         }
 

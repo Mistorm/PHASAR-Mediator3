@@ -2,18 +2,22 @@ package nl.ru.cs.phasar.mediator.documentsource;
 
 import java.util.ArrayList;
 import java.util.List;
-//import nl.naiaden.twistinator.client.TwistClient;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
 
 /**
- *
+ * Mock-up. <code>DocumentSource</code> implementation that uses the PHASAR server to resolve the server query.
  * @author bartvz
  */
 public class ServerQueryResolver implements DocumentSource {
 
+    /**
+     * Mock-up.
+     * @param metadata
+     * @param triples
+     * @return 
+     */
     @Override
     public List<Result> getDocuments(Metadata metadata, List triples) {
-        //String serverAnswer = TwistClient.resolveQuery(triples);
 
         String answer = "This is not the string you are looking for...";
 

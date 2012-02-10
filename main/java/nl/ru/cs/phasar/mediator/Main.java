@@ -18,6 +18,10 @@ public class Main {
 
     private static String PROPERTIES_FILE = "mediator.properties";
 
+    /**
+     * Read the settings from the properties file, create a <code>URI</code> and return it
+     * @return URI The URI the webservice is bound to 
+     */
     private static URI getBaseURI() {
 
         URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
@@ -28,8 +32,10 @@ public class Main {
         }
         catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            configFile.setProperty("FROM_URI", "http://localhost/");
+            configFile.setProperty("PORT", "9998");
         }
-        
+
         return UriBuilder.fromUri(configFile.getProperty("FROM_URI")).port(Integer.parseInt(configFile.getProperty("PORT"))).build();
     }
     public static final URI BASE_URI = getBaseURI();

@@ -2,15 +2,21 @@ package nl.ru.cs.phasar.mediator.documentsource.flatfile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nl.ru.cs.phasar.mediator.documentsource.DocumentSource;
-import nl.ru.cs.phasar.mediator.documentsource.Hit;
 import nl.ru.cs.phasar.mediator.documentsource.Result;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
+import nl.ru.cs.phasar.mediator.resource.MediatorResource;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
 
 /**
@@ -19,17 +25,26 @@ import nl.ru.cs.phasar.mediator.userquery.Metadata;
  */
 public class FlatSource implements DocumentSource {
 
-    private static final String FILEPATH = "/home/mistorm/workspaces/netbeans/Mediator3/src/main/resources/examplesents.txt";
-    //private static final String FILEPATH = "/home/mistorm/workspaces/netbeans/Mediator3/src/main/resources/nrcsents.txt";
     private List<Result> resultList;
     private char newChar;
+    private static String PROPERTIES_FILE = "mediator.properties";
 
     public FlatSource() {
+
+        URL url = MediatorResource.class.getProtectionDomain().getCodeSource().getLocation();
+
+        Properties configFile = new Properties();
+        try {
+            configFile.load(new FileReader(url.getPath() + PROPERTIES_FILE));
+        }
+        catch (IOException ex) {
+            Logger.getLogger(MediatorResource.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         this.resultList = new ArrayList<Result>();
 
         try {
-            parseFile(FILEPATH);
+            parseFile(configFile.getProperty("INTERNAL_DOCSOURCE_FILE"));
         }
         catch (FileNotFoundException ex) {
             Logger.getLogger(FlatSource.class.getName()).log(Level.SEVERE, null, ex);
@@ -41,6 +56,8 @@ public class FlatSource implements DocumentSource {
         String line = null;
         Result currentResult = null;
         String[] currentTriple = null;
+        String[] words;
+        String relator;
 
         File file = new File(filePath);
 
@@ -50,14 +67,34 @@ public class FlatSource implements DocumentSource {
             line = scan.nextLine();
             //If a line starts with a [, it contains a ground triple.
             if (line.startsWith("[")) {
-                currentTriple = line.split(",");
+
+                line.replaceAll(Pattern.quote("[[]|[]]"), " ");
+                line.trim();
+                
+                currentTriple = new String[3];
+                words = line.split(",[A-Z]+[^,]*,");
+                Matcher matcher = Pattern.compile(",[A-Z]+[^,]*,").matcher(line);
+
+                if (matcher.find()) {
+                    relator = matcher.group();
+                } else {
+                    relator = null;
+                }
+
+                try {
+                    currentTriple[0] = words[0];
+                    currentTriple[1] = relator;
+                    currentTriple[2] = words[1];
+                }
+                catch (Exception e) {
+                }
 
                 //TODO: This is.. ugly. Should be easier?
-                for (int i = 0; i < currentTriple.length; i++) {
-                    currentTriple[i] = currentTriple[i].replace('[', newChar);
-                    currentTriple[i] = currentTriple[i].replace(']', newChar);
-                    currentTriple[i] = currentTriple[i].trim();
-                }
+                //for (int i = 0; i < currentTriple.length; i++) {
+                //    currentTriple[i] = currentTriple[i].replace('[', newChar);
+                //    currentTriple[i] = currentTriple[i].replace(']', newChar);
+                //    currentTriple[i] = currentTriple[i].trim();
+                //}
 
                 currentResult.addTriple(new Triple(currentTriple));
             } //No [, so it must be a sentece.

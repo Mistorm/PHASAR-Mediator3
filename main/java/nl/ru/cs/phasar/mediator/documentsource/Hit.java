@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
+ * @deprecated Deprecated, use result instead
  * @author bartvz <bvanzeeland at gmail dot com>
  */
 public class Hit {

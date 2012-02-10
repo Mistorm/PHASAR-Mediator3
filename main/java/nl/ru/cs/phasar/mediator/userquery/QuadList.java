@@ -40,7 +40,7 @@ public class QuadList {
         //Print the list of triples
         for (int j = 0; j < triples.size(); j++) {
 
-            System.out.println("Triple: " + triples.get(j).getGroundA() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundB());
+            System.out.println("Triple: " + triples.get(j).getGroundHead() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundTail());
 
         }
 
