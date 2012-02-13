@@ -20,13 +20,13 @@ import nl.ru.cs.phasar.mediator.resource.MediatorResource;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
 
 /**
- *
+ * FlatSource parses a plain text file with sents and triples. Slow but allows 
+ * the use of the PHASAR system without the server.
  * @author bartvz <bvanzeeland at gmail dot com>
  */
 public class FlatSource implements DocumentSource {
 
     private List<Result> resultList;
-    private char newChar;
     private static String PROPERTIES_FILE = "mediator.properties";
 
     public FlatSource() {
@@ -68,35 +68,26 @@ public class FlatSource implements DocumentSource {
             //If a line starts with a [, it contains a ground triple.
             if (line.startsWith("[")) {
 
-                line.replaceAll(Pattern.quote("[[]|[]]"), " ");
+                line = line.replace('[', ' ');
+                line = line.replace(']', ' ');
                 line.trim();
-                
-                currentTriple = new String[3];
+
                 words = line.split(",[A-Z]+[^,]*,");
+
                 Matcher matcher = Pattern.compile(",[A-Z]+[^,]*,").matcher(line);
-
-                if (matcher.find()) {
+                if (( matcher.find() ) && ( words.length == 2 )) {
                     relator = matcher.group();
-                } else {
-                    relator = null;
-                }
 
-                try {
+                    currentTriple = new String[3];
+
                     currentTriple[0] = words[0];
                     currentTriple[1] = relator;
                     currentTriple[2] = words[1];
-                }
-                catch (Exception e) {
-                }
 
-                //TODO: This is.. ugly. Should be easier?
-                //for (int i = 0; i < currentTriple.length; i++) {
-                //    currentTriple[i] = currentTriple[i].replace('[', newChar);
-                //    currentTriple[i] = currentTriple[i].replace(']', newChar);
-                //    currentTriple[i] = currentTriple[i].trim();
-                //}
-
-                currentResult.addTriple(new Triple(currentTriple));
+                    currentResult.addTriple(new Triple(currentTriple));
+                } else {
+                    relator = null;
+                }
             } //No [, so it must be a sentece.
             else {
                 if (currentResult != null) {
@@ -104,7 +95,6 @@ public class FlatSource implements DocumentSource {
                 }
                 currentResult = new Result(line);
             }
-
             line = null;
         }
     }

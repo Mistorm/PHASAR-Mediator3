@@ -74,31 +74,5 @@ public class Result {
 
         return jsonObject;
     }
-
-//Dead Code?
-//    @Override
-//    public boolean equals(Object object) {
-//        if (object.getClass() == Result.class) {
-//            Result result = (Result) object;
-//
-//            if (( this.content.equals(result.getContent()) )
-//                    && ( this.triples.containsAll(result.getTriples()) )
-//                    && ( this.triples.size() == result.getTriples().size() )) {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        int hash = 5;
-//        hash = 97 * hash + ( this.content != null ? this.content.hashCode() : 0 );
-//        hash = 97 * hash + ( this.triples != null ? this.triples.hashCode() : 0 );
-//        return hash;
-//    }
 }
 
