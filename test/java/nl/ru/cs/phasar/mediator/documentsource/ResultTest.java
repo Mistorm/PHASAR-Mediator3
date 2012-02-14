@@ -65,10 +65,10 @@ public class ResultTest extends TestCase {
         Result instance = new Result("Handelaar J. Bestebreurtje van de Mild Coffee Company verwacht dat de prijs met nog 80 cent zal stijgen.", triples);
         
         List<Triple> expResult = new ArrayList<Triple>();
-        triples.add(new Triple("head", "relator", "tail", "tail"));
-        triples.add(new Triple("head", "relator", "tail", "head"));
-        triples.add(new Triple("financieren", "MOD", "zelf", "zelf"));
-        triples.add(new Triple("duidelijk", "ATTR", "vruchten", "duidelijk"));
+        expResult.add(new Triple("head", "relator", "tail", "tail"));
+        expResult.add(new Triple("head", "relator", "tail", "head"));
+        expResult.add(new Triple("financieren", "MOD", "zelf", "zelf"));
+        expResult.add(new Triple("duidelijk", "ATTR", "vruchten", "duidelijk"));
         
         List result = instance.getTriples();
         assertEquals(expResult, result);
@@ -126,7 +126,7 @@ public class ResultTest extends TestCase {
         triples.add(new Triple("zijn", "PRED", "dat", "dat"));
         Result instance = new Result("Het Interim-Comite is het er over eens dat globalisering", triples);
         
-        Triple triple = new Triple("*", "PRED", "zijn", "dat");
+        Triple triple = new Triple("*", "PRED", "zijn", "*");
         
         boolean expResult = true;
         boolean result = instance.matchTriple(triple);
@@ -140,7 +140,7 @@ public class ResultTest extends TestCase {
         triples.add(new Triple("zijn", "PRED", "dat", "dat"));
         Result instance = new Result("Het Interim-Comite is het er over eens dat globalisering", triples);
         
-        Triple triple = new Triple("*", "*", "*", "dat");
+        Triple triple = new Triple("*", "*", "*", "*");
         
         boolean expResult = true;
         boolean result = instance.matchTriple(triple);
@@ -163,6 +163,6 @@ public class ResultTest extends TestCase {
         expResult.put("triples", triples);
 
         JSONObject result = instance.getJSONObject();
-        assertEquals(expResult, result);
+        assertEquals(expResult.toString(), result.toString());
     }
 }

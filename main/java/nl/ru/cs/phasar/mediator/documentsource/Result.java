@@ -62,6 +62,40 @@ public class Result {
         return match;
     }
 
+    @Override
+    public boolean equals(Object o) {
+
+        if (o.getClass() != this.getClass()) {
+            return false;
+        } else {
+            Result result = (Result) o;
+
+            if (!this.getContent().equals(result.getContent())) {
+                return false;
+            }
+
+            if (this.getTriples().size() != result.getTriples().size()) {
+                return false;
+            }
+
+            for (Triple t : result.getTriples()) {
+                if (!this.triples.contains(t)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 61 * hash + ( this.content != null ? this.content.hashCode() : 0 );
+        hash = 61 * hash + ( this.triples != null ? this.triples.hashCode() : 0 );
+        return hash;
+    }
+
     /**
      * Get a <code>JSONObject</code> representation of the <code>Result</code>
      * @return JSONObject
@@ -75,4 +109,3 @@ public class Result {
         return jsonObject;
     }
 }
-

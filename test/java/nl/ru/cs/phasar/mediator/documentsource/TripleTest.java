@@ -11,32 +11,19 @@ import junit.framework.TestCase;
  * @author bartvz <bvanzeeland at gmail dot com>
  */
 public class TripleTest extends TestCase {
-    
+
     public TripleTest(String testName) {
         super(testName);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-    }
-
-    /**
-     * Test of getHead method, of class Triple.
-     */
-    public void testGetHead() {
-        System.out.println("getHead");
-        Triple instance = null;
-        String expResult = "";
-        String result = instance.getHead();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -44,38 +31,10 @@ public class TripleTest extends TestCase {
      */
     public void testGetGroundHead() {
         System.out.println("getGroundHead");
-        Triple instance = null;
-        String expResult = "";
+        Triple instance = new Triple("vakbondsleiders", "PREPvan", "arrestatie", "vakbondsleiders");
+        String expResult = "arrestatie";
         String result = instance.getGroundHead();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getRelator method, of class Triple.
-     */
-    public void testGetRelator() {
-        System.out.println("getRelator");
-        Triple instance = null;
-        String expResult = "";
-        String result = instance.getRelator();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getTail method, of class Triple.
-     */
-    public void testGetTail() {
-        System.out.println("getTail");
-        Triple instance = null;
-        String expResult = "";
-        String result = instance.getTail();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -83,25 +42,10 @@ public class TripleTest extends TestCase {
      */
     public void testGetGroundTail() {
         System.out.println("getGroundTail");
-        Triple instance = null;
-        String expResult = "";
+        Triple instance = new Triple("vakbondsleiders", "PREPvan", "arrestatie", "vakbondsleiders");;
+        String expResult = "vakbondsleiders";
         String result = instance.getGroundTail();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getDirection method, of class Triple.
-     */
-    public void testGetDirection() {
-        System.out.println("getDirection");
-        Triple instance = null;
-        String expResult = "";
-        String result = instance.getDirection();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -109,25 +53,44 @@ public class TripleTest extends TestCase {
      */
     public void testToString() {
         System.out.println("toString");
-        Triple instance = null;
-        String expResult = "";
+        Triple instance = new Triple("economie", "PREPom", "manier", "economie");
+        String expResult = "manier PREPom economie";
         String result = instance.toString();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
      * Test of match method, of class Triple.
      */
+    public boolean match(Triple match) {
+        System.out.println("match with: " + match.toString());
+
+        Triple triple = new Triple("economie", "PREPom", "manier", "economie");
+
+        return triple.match(match);
+    }
+
     public void testMatch() {
-        System.out.println("match");
-        Triple triple = null;
-        Triple instance = null;
-        boolean expResult = false;
-        boolean result = instance.match(triple);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue("testMatch failed!", match(new Triple("economie", "PREPom", "manier", "economie")));
+    }
+
+    public void testMatchShuffle() {
+        assertTrue("testMatchShuffle failed!", match(new Triple("manier", "PREPom", "economie", "economie")));
+    }
+
+    public void testMatchHeadWildcard() {
+        assertTrue("testMatchHeadWildcard failed!", match(new Triple("*", "PREPom", "economie", "economie")));
+    }
+
+    public void testMatchRelatorWildcard() {
+        assertTrue("testMatchRelatorWildcard failed!", match(new Triple("manier", "*", "economie", "economie")));
+    }
+
+    public void testMatchTailWildcard() {
+        assertTrue("testMatchTailWildcard failed!", match(new Triple("manier", "PREPom", "*", "*")));
+    }
+
+    public void testMatchFullWildcard() {
+        assertTrue("testMatchFullWildcard failed!", match(new Triple("*", "*", "*", "*")));
     }
 }

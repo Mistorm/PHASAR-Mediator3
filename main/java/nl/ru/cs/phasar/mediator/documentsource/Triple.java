@@ -109,14 +109,59 @@ public class Triple {
      * @return boolean True is a match, false otherwise.
      */
     public boolean match(Triple triple) {
-        Boolean match = false;
 
-        if (( ( this.getGroundHead().equals(triple.getGroundHead()) ) || ( triple.getGroundHead().equals(WILDCARD) ) )
-                && ( ( this.relator.equals(triple.relator) ) || ( triple.getRelator().equals(WILDCARD) ) )
-                && ( ( this.getGroundTail().equals(triple.getGroundTail()) ) || ( triple.getTail().equals(WILDCARD) ) )) {
-            match = true;
+        String thisHead = this.getGroundHead();
+        String matchHead = triple.getGroundHead();
+        
+        String thisTail = this.getGroundTail();
+        String matchTail = triple.getGroundTail();
+        
+        if (!( thisHead.equals(matchHead) ) && !( matchHead.equals(WILDCARD) )) {
+            return false;
         }
 
-        return match;
+        if (!( this.relator.equals(triple.relator) ) && !( triple.getRelator().equals(WILDCARD) )) {
+            return false;
+        }
+
+        if (!( thisTail.equals(matchTail) ) && !( matchTail.equals(WILDCARD) )) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 41 * hash + ( this.head != null ? this.head.hashCode() : 0 );
+        hash = 41 * hash + ( this.relator != null ? this.relator.hashCode() : 0 );
+        hash = 41 * hash + ( this.tail != null ? this.tail.hashCode() : 0 );
+        hash = 41 * hash + ( this.direction != null ? this.direction.hashCode() : 0 );
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Triple other = (Triple) obj;
+        if (( this.head == null ) ? ( other.head != null ) : !this.head.equals(other.head)) {
+            return false;
+        }
+        if (( this.relator == null ) ? ( other.relator != null ) : !this.relator.equals(other.relator)) {
+            return false;
+        }
+        if (( this.tail == null ) ? ( other.tail != null ) : !this.tail.equals(other.tail)) {
+            return false;
+        }
+        if (( this.direction == null ) ? ( other.direction != null ) : !this.direction.equals(other.direction)) {
+            return false;
+        }
+        return true;
     }
 }
