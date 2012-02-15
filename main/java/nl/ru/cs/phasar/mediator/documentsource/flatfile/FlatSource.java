@@ -29,6 +29,9 @@ public class FlatSource implements DocumentSource {
     private List<Result> resultList;
     private static String PROPERTIES_FILE = "mediator.properties";
 
+    /**
+     * Use the settings from the properties file to create a new FlatSource sents parser.
+     */
     public FlatSource() {
 
         URL url = MediatorResource.class.getProtectionDomain().getCodeSource().getLocation();
@@ -45,6 +48,20 @@ public class FlatSource implements DocumentSource {
 
         try {
             parseFile(configFile.getProperty("INTERNAL_DOCSOURCE_FILE"));
+        }
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(FlatSource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Create a FlatSource parser that uses the given file as a sents document.
+     * @param filepath String containing the path to the sents document to be used.
+     */
+    public FlatSource(String filepath) {
+        this.resultList = new ArrayList<Result>();
+        try {
+            parseFile(filepath);
         }
         catch (FileNotFoundException ex) {
             Logger.getLogger(FlatSource.class.getName()).log(Level.SEVERE, null, ex);
@@ -68,8 +85,8 @@ public class FlatSource implements DocumentSource {
             //If a line starts with a [, it contains a ground triple.
             if (line.startsWith("[")) {
 
-                line = line.replace('[', ' ');
-                line = line.replace(']', ' ');
+                line = line.replace("[", "");
+                line = line.replace("]", "");
                 line.trim();
 
                 words = line.split(",[A-Z]+[^,]*,");
@@ -77,7 +94,10 @@ public class FlatSource implements DocumentSource {
                 Matcher matcher = Pattern.compile(",[A-Z]+[^,]*,").matcher(line);
                 if (( matcher.find() ) && ( words.length == 2 )) {
                     relator = matcher.group();
-
+                    relator = relator.replace(",", "");
+                    relator.trim();
+                    
+                    
                     currentTriple = new String[3];
 
                     currentTriple[0] = words[0];
