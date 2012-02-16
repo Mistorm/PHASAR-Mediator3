@@ -114,13 +114,13 @@ public class Query {
 
         for (Triple t : matches) {
             String value = "";
-            if (position.equals("a")) {
+            if (position.equals("head")) {
                 value = t.getGroundHead();
             } else if (position.equals(
                     "relator")) {
                 value = t.getRelator();
             } else if (position.equals(
-                    "b")) {
+                    "tail")) {
                 value = t.getGroundTail();
             }
 
@@ -144,4 +144,40 @@ public class Query {
 
         return suggestionList;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + ( this.source != null ? this.source.hashCode() : 0 );
+        hash = 53 * hash + ( this.metadata != null ? this.metadata.hashCode() : 0 );
+        hash = 53 * hash + ( this.json != null ? this.json.hashCode() : 0 );
+        hash = 53 * hash + ( this.resultList != null ? this.resultList.hashCode() : 0 );
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Query other = (Query) obj;
+        if (this.source != other.source && ( this.source == null || !this.source.equals(other.source) )) {
+            return false;
+        }
+        if (this.metadata != other.metadata && ( this.metadata == null || !this.metadata.equals(other.metadata) )) {
+            return false;
+        }
+        if (( this.json == null ) ? ( other.json != null ) : !this.json.equals(other.json)) {
+            return false;
+        }
+        if (this.resultList != other.resultList && ( this.resultList == null || !this.resultList.equals(other.resultList) )) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

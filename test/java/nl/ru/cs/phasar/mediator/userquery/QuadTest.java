@@ -37,11 +37,17 @@ public class QuadTest extends TestCase {
         boxes.put(3, "activiteiten");
         boxes.put(4, "bestaande");
         
-        Quad instance = null;
-        String[] expResult = null;
+        Quad instance = new Quad(0, "MOD", 2, 2);
+        
+        String[] expResult = new String[3];
+        expResult[0] = "aansluiting";
+        expResult[1] = "MOD";
+        expResult[2] = "heel";
+        
         String[] result = instance.toTriple(boxes);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
+        for(int i = 0; i < result.length; i++){
+            assertTrue("Result on position " + i + " is not equal.", result[i].equals(expResult[i]));
+        }
     }
 }

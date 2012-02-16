@@ -38,9 +38,9 @@ public class BoxSuggestionResource extends AbstractSuggestionResource {
         //Count the terms
         List<SuggestionItem> SuggestionList;
         if (triple.getGroundHead().equals(WILDCARD)) {
-            SuggestionList = query.getSuggestion(triple, "a");
+            SuggestionList = query.getSuggestion(triple, "head");
         } else {
-            SuggestionList = query.getSuggestion(triple, "b");
+            SuggestionList = query.getSuggestion(triple, "tail");
         }
         
         //Build the JSON answer
