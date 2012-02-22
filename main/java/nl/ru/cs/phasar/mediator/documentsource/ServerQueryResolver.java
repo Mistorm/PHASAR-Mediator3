@@ -1,58 +1,106 @@
 package nl.ru.cs.phasar.mediator.documentsource;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import nl.naiaden.twistinator.client.TwistClientHandler;
+import nl.naiaden.twistinator.client.TwistClientPipelineFactory;
+import nl.naiaden.twistinator.indexer.document.Keyword;
+import nl.naiaden.twistinator.indexer.document.Relator;
+import nl.naiaden.twistinator.indexer.document.Triple;
+import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
 /**
- * Mock-up. <code>DocumentSource</code> implementation that uses the PHASAR server to resolve the server query.
- * @author bartvz
+ * @author louis & bartvz
  */
 public class ServerQueryResolver implements DocumentSource {
 
-    /**
-     * Mock-up.
-     * @param metadata
-     * @param triples
-     * @return 
-     */
+    Logger log = Logger.getLogger(ServerQueryCache.class);
+
+    static {
+	final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+	if (!rootLogger.getAllAppenders().hasMoreElements()) {
+	    rootLogger.setLevel(Level.DEBUG);
+	    rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%d{ABSOLUTE} [%-11t] %x %-5p %c{1} - %m%n")));
+	}
+    }
+
     @Override
-    public List<Result> getDocuments(Metadata metadata, List triples) {
+    public List<Result> getDocuments(Metadata metadata, List<nl.ru.cs.phasar.mediator.documentsource.Triple> triples) {
 
-        String answer = "De Europese Unie, die een klacht heeft ingediend bij de Wereldhandelsorganisatie WTO tegen de wet, reageerde gisteren positief op het uitstel.";
+	List<Result> resultList = new ArrayList<Result>();
 
-        String[] a = new String[3];
-        a[0] = "indienen";
-        a[1] = "OBJ";
-        a[2] = "het";
+	//Searching without the triple(s) to find is imposible
+	if (triples.isEmpty()) {
+	    return resultList;
+	}
 
-        String b[] = new String[3];
-        b[0] = "klacht";
-        b[1] = "SUBJ";
-        b[2] = "indienen";
+	// Parse options.
+	final String host = "localhost";
+	final int port = 8123;
 
-        List<Triple> matchedTriples = new ArrayList<Triple>();
-        matchedTriples.add(new Triple(b));
-        matchedTriples.add(new Triple(b));
 
-        Result result = new Result(answer, matchedTriples);
+	// Configure the client.
+	ClientBootstrap bootstrap = new ClientBootstrap(
+		new NioClientSocketChannelFactory(
+		Executors.newCachedThreadPool(),
+		Executors.newCachedThreadPool()));
 
-        List<Result> value = new ArrayList();
-        value.add(result);
 
-        answer = "Dit wordt voor de periode tussen 26 december en 3 januari becijferd op 403 miljoen dollar.";
+	// Set up the pipeline factory.
+	bootstrap.setPipelineFactory(new TwistClientPipelineFactory());
 
-        a = new String[3];
-        a[0] = "becijferen";
-        a[1] = "OBJ";
-        a[2] = "dollar";
+	// Start the connection attempt.
+	ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
+	Channel channel = connectFuture.awaitUninterruptibly().getChannel();
 
-        matchedTriples = new ArrayList<Triple>();
-        matchedTriples.add(new Triple(a));
+	TwistClientHandler handler = (TwistClientHandler) channel.getPipeline().getLast();
 
-        result = new Result(answer, matchedTriples);
+	// Create the query
+	for (nl.ru.cs.phasar.mediator.documentsource.Triple t : triples) {
+	    handler.addQuery(new SearchQuery(new Triple(new Keyword(t.getGroundHead()), new Relator(t.getRelator()), new Keyword(t.getGroundTail()))));
+	}
 
-        value.add(result);
-        return value;
+	String serverResult = handler.getMessage().toString();
+
+	serverResult = serverResult.replaceFirst("SearchResult: ", "");
+
+	String[] split = serverResult.split("\\[+[^\\s]+\\]");
+
+	for (int s = 0; s < split.length; s++) {
+	    Matcher matcher = Pattern.compile("\\<+[^\\s]+\\>").matcher(split[s]);
+
+	    String sentence = split[s].replaceAll("\\<+[^\\s]+\\>", "");
+	    //System.out.println(sentence.trim());
+	    Result result = new Result(sentence);
+
+	    while (matcher.find()) {
+		
+		String protoTriple = matcher.group().replaceAll("<|>", "");
+		nl.ru.cs.phasar.mediator.documentsource.Triple triple = new nl.ru.cs.phasar.mediator.documentsource.Triple(protoTriple.split(","));
+		//System.out.println(triple.toString());
+		result.addTriple(triple);
+	    }
+	    resultList.add(result);
+	}
+
+	handler.done = true;
+
+	bootstrap.releaseExternalResources();
+
+	return resultList;
     }
 }
