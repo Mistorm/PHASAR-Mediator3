@@ -79,20 +79,35 @@ public class ServerQueryResolver implements DocumentSource {
 	serverResult = serverResult.replaceFirst("SearchResult: ", "");
 
 	String[] split = serverResult.split("\\[+[^\\s]+\\]");
+	Matcher relatorMatcher = Pattern.compile(",[A-Z]+[^,]*,").matcher("");
+	Matcher matcher = Pattern.compile("\\<+[^\\s]+\\>").matcher("");
+	String[] words;
+	String relator;
 
 	for (int s = 0; s < split.length; s++) {
-	    Matcher matcher = Pattern.compile("\\<+[^\\s]+\\>").matcher(split[s]);
 
 	    String sentence = split[s].replaceAll("\\<+[^\\s]+\\>", "");
-	    //System.out.println(sentence.trim());
 	    Result result = new Result(sentence);
 
+	    matcher.reset(split[s]);
+
 	    while (matcher.find()) {
-		
 		String protoTriple = matcher.group().replaceAll("<|>", "");
-		nl.ru.cs.phasar.mediator.documentsource.Triple triple = new nl.ru.cs.phasar.mediator.documentsource.Triple(protoTriple.split(","));
-		//System.out.println(triple.toString());
-		result.addTriple(triple);
+
+		words = protoTriple.split(",[A-Z]+[^,]*,");
+		relatorMatcher.reset(protoTriple);
+
+		if ((relatorMatcher.find()) && (words.length == 2)) {
+		    relator = relatorMatcher.group();
+		    relator = relator.replace(",", "");
+		    relator.trim();
+
+		    nl.ru.cs.phasar.mediator.documentsource.Triple triple = new nl.ru.cs.phasar.mediator.documentsource.Triple(words[0], relator, words[1], words[1]);
+
+		    result.addTriple(triple);
+		} else {
+		    relator = null;
+		}
 	    }
 	    resultList.add(result);
 	}
