@@ -2,18 +2,21 @@ package nl.ru.cs.phasar.mediator.documentsource;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import nl.naiaden.twistinator.client.TwistClientHandler;
 import nl.naiaden.twistinator.client.TwistClientPipelineFactory;
 import nl.naiaden.twistinator.indexer.document.Keyword;
 import nl.naiaden.twistinator.indexer.document.Relator;
 import nl.naiaden.twistinator.indexer.document.Triple;
+import nl.naiaden.twistinator.indexer.document.Triples;
+import nl.naiaden.twistinator.indexer.input.Sent;
+import nl.naiaden.twistinator.indexer.input.Sents;
+import nl.naiaden.twistinator.objects.Returnable;
 import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.ru.cs.phasar.mediator.userquery.Metadata;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -41,7 +44,11 @@ public class ServerQueryResolver implements DocumentSource {
     @Override
     public List<Result> getDocuments(Metadata metadata, List<nl.ru.cs.phasar.mediator.documentsource.Triple> triples) {
 
+	List<List<Result>> resultLists = new ArrayList<List<Result>>();
 	List<Result> resultList = new ArrayList<Result>();
+	List<Returnable> returnables = new ArrayList<Returnable>();
+
+	Result result;
 
 	//Searching without the triple(s) to find is imposible
 	if (triples.isEmpty()) {
@@ -52,70 +59,110 @@ public class ServerQueryResolver implements DocumentSource {
 	final String host = "localhost";
 	final int port = 8123;
 
-
 	// Configure the client.
 	ClientBootstrap bootstrap = new ClientBootstrap(
 		new NioClientSocketChannelFactory(
 		Executors.newCachedThreadPool(),
 		Executors.newCachedThreadPool()));
 
-
 	// Set up the pipeline factory.
 	bootstrap.setPipelineFactory(new TwistClientPipelineFactory());
 
 	// Start the connection attempt.
-	ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
-	Channel channel = connectFuture.awaitUninterruptibly().getChannel();
+	//ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
+	//Channel channel = connectFuture.awaitUninterruptibly().getChannel();
 
-	TwistClientHandler handler = (TwistClientHandler) channel.getPipeline().getLast();
+	//TwistClientHandler handler = null;
 
 	// Create the query
 	for (nl.ru.cs.phasar.mediator.documentsource.Triple t : triples) {
+	    System.out.println(t.toString());
+	    ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
+	    Channel channel = connectFuture.awaitUninterruptibly().getChannel();
+	    TwistClientHandler handler = (TwistClientHandler) channel.getPipeline().getLast();
+	    //handler = (TwistClientHandler) channel.getPipeline().getLast();
 	    handler.addQuery(new SearchQuery(new Triple(new Keyword(t.getGroundHead()), new Relator(t.getRelator()), new Keyword(t.getGroundTail()))));
+	    returnables.add(handler.getMessage().result);
+	    handler.done = true;
 	}
 
-	String serverResult = handler.getMessage().toString();
-
-	serverResult = serverResult.replaceFirst("SearchResult: ", "");
-
-	String[] split = serverResult.split("\\[+[^\\s]+\\]");
-	Matcher relatorMatcher = Pattern.compile(",[A-Z]+[^,]*,").matcher("");
-	Matcher matcher = Pattern.compile("\\<+[^\\s]+\\>").matcher("");
-	String[] words;
-	String relator;
-
-	for (int s = 0; s < split.length; s++) {
-
-	    String sentence = split[s].replaceAll("\\<+[^\\s]+\\>", "");
-	    Result result = new Result(sentence);
-
-	    matcher.reset(split[s]);
-
-	    while (matcher.find()) {
-		String protoTriple = matcher.group().replaceAll("<|>", "");
-
-		words = protoTriple.split(",[A-Z]+[^,]*,");
-		relatorMatcher.reset(protoTriple);
-
-		if ((relatorMatcher.find()) && (words.length == 2)) {
-		    relator = relatorMatcher.group();
-		    relator = relator.replace(",", "");
-		    relator.trim();
-
-		    nl.ru.cs.phasar.mediator.documentsource.Triple triple = new nl.ru.cs.phasar.mediator.documentsource.Triple(words[0], relator, words[1], words[1]);
-
-		    result.addTriple(triple);
-		} else {
-		    relator = null;
-		}
-	    }
-	    resultList.add(result);
-	}
-
-	handler.done = true;
+	//handler.done = true;
 
 	bootstrap.releaseExternalResources();
 
-	return resultList;
+//	String serverResult = handler.getMessage().toString();
+//	String serverResult = r.toString();
+
+	for (Returnable r : returnables) {
+
+	    if (r != null && r.getClass().equals(Sents.class)) {
+		Sents sents = (Sents) r;
+		System.out.println("Returnable is a Sents object, proccesing...");
+
+		resultList = new ArrayList<Result>();
+
+		for (Sent s : sents) {
+
+		    result = new Result(s.getSentence());
+		    Triples resultTriples = s.getTriples();
+
+		    for (Triple t : resultTriples) {
+			result.addTriple(new nl.ru.cs.phasar.mediator.documentsource.Triple(t.getLeft().toString(), t.getMiddle().toString(), t.getRight().toString(), t.getLeft().toString()));
+		    }
+		    resultList.add(result);
+		}
+		resultLists.add(resultList);
+	    }
+	}
+
+	if (resultLists.size() <= 1) {
+	    return resultList;
+	} else {
+	    Collection intersection = CollectionUtils.intersection(resultLists.get(0), resultLists.get(1));
+
+	    if (resultLists.size() > 2) {
+		for (int i = 2; i < resultLists.size(); i++) {
+		    intersection = CollectionUtils.intersection(intersection, resultLists.get(i));
+		}
+	    }
+
+	    return (List<Result>) intersection;
+	}
+
+//	serverResult = serverResult.replaceFirst("SearchResult: ", "");
+//
+//	String[] split = serverResult.split("\\[+[^\\s]+\\]");
+//	Matcher relatorMatcher = Pattern.compile(",[A-Z]+[^,]*,").matcher("");
+//	Matcher matcher = Pattern.compile("\\<+[^\\s]+\\>").matcher("");
+//	String[] words;
+//	String relator;
+//
+//	for (int s = 0; s < split.length; s++) {
+//
+//	    String sentence = split[s].replaceAll("\\<+[^\\s]+\\>", "");
+//	    result = new Result(sentence);
+//
+//	    matcher.reset(split[s]);
+//
+//	    while (matcher.find()) {
+//		String protoTriple = matcher.group().replaceAll("<|>", "");
+//
+//		words = protoTriple.split(",[A-Z]+[^,]*,");
+//		relatorMatcher.reset(protoTriple);
+//
+//		if ((relatorMatcher.find()) && (words.length == 2)) {
+//		    relator = relatorMatcher.group();
+//		    relator = relator.replace(",", "");
+//		    relator.trim();
+//
+//		    nl.ru.cs.phasar.mediator.documentsource.Triple triple = new nl.ru.cs.phasar.mediator.documentsource.Triple(words[0], relator, words[1], words[1]);
+//
+//		    result.addTriple(triple);
+//		} else {
+//		    relator = null;
+//		}
+//	    }
+//	    resultList.add(result);
+//	}
     }
 }
