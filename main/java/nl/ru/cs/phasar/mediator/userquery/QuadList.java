@@ -1,9 +1,11 @@
 package nl.ru.cs.phasar.mediator.userquery;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
@@ -19,99 +21,95 @@ public class QuadList {
 
     private HashMap<Integer, String> boxes;
     private List<Quad> quads;
+    private static String WILDCARD = "*";
 
     public QuadList() {
-        boxes = new HashMap<Integer, String>();
-        quads = new ArrayList<Quad>();
+	boxes = new HashMap<Integer, String>();
+	quads = new ArrayList<Quad>();
     }
 
     public List<Triple> getTriples() {
 
-        Quad quad;
-        List<Triple> triples = new ArrayList();
+	Quad quad;
+	List<Triple> triples = new ArrayList();
 
-        Iterator i = quads.iterator();
+	Iterator i = quads.iterator();
 
-        while (i.hasNext()) {
-            quad = (Quad) i.next();
-            triples.add(new Triple(quad.toTriple(boxes)));
-        }
+	while (i.hasNext()) {
+	    quad = (Quad) i.next();
+	    triples.add(new Triple(quad.toTriple(boxes)));
+	}
 
-        //Print the list of triples
-        for (int j = 0; j < triples.size(); j++) {
+	//Print the list of triples
+	for (int j = 0; j < triples.size(); j++) {
 
-            System.out.println("Triple: " + triples.get(j).getGroundHead() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundTail());
+	    System.out.println("Triple: " + triples.get(j).getGroundHead() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundTail());
 
-        }
+	}
 
-        return triples;
+	return triples;
     }
 
     public void buildQuads(String json) {
 
-        JSONObject jsonObject = null;
+	JSONObject jsonObject = null;
 
-        try {
-            jsonObject = new JSONObject(json);
-        }
-        catch (JSONException ex) {
-            Logger.getLogger(Quad.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        this.findQuads(jsonObject);
-
+	try {
+	    jsonObject = new JSONObject(json);
+	    this.findQuads(jsonObject);
+	} catch (JSONException ex) {
+	    Logger.getLogger(Quad.class.getName()).log(Level.SEVERE, null, ex);
+	}
     }
 
-    private void findQuads(JSONObject jsonObject) {
+    private void findQuads(JSONObject jsonObject) throws JSONException {
 
-        boolean content = jsonObject.has("content");
-        boolean direction = jsonObject.has("direction");
-        boolean relator = jsonObject.has("relator");
+	int i;
+	Integer boxCount = 0;
+	Integer arrowCount = 0;
 
+	if (jsonObject.has("boxes")) {
+	    JSONArray jsonBoxes = jsonObject.getJSONArray("boxes");
+	    boxCount = jsonBoxes.length();
 
-        if (content && !( direction )) { //Boxes don't have direction
-            boxes.put(jsonObject.optInt("nr"), jsonObject.optString("content"));
-        } else if (relator && direction) { //Only arrows have relators & directions
-            Quad quad = new Quad(
-                    jsonObject.optInt("a"),
-                    jsonObject.optString("relator"),
-                    jsonObject.optInt("b"),
-                    jsonObject.optInt("direction"));
-            quads.add(quad);
-        }
+	    for (i = 0; i < boxCount; i++) {
+		JSONObject box = jsonBoxes.getJSONObject(i);
+		boxes.put(box.getInt("nr"), box.getString("content"));
+	    }
+	}
 
-        Iterator i = jsonObject.keys();
-        Object returned;
+	if (jsonObject.has("arrows")) {
+	    JSONArray jsonArrows = jsonObject.getJSONArray("arrows");
+	    arrowCount = jsonArrows.length();
 
-        while (i.hasNext()) {
-            String key = (String) i.next();
+	    for (i = 0; i < arrowCount; i++) {
+		JSONObject arrow = jsonArrows.getJSONObject(i);
+		Quad quad = new Quad(
+			arrow.getInt("a"),
+			arrow.getString("relator"),
+			arrow.getInt("b"),
+			arrow.getInt("direction"));
+		quads.add(quad);
+	    }
+	}
 
-            returned = jsonObject.optJSONArray(key);
-            if (returned != null) {
-                this.findQuads((JSONArray) returned);
-            }
+	//Sometimes a query containing only a box is send in. Expand this to a 
+	//proper query
+	if (boxCount == 1 && arrowCount == 0) {
 
-            returned = jsonObject.optJSONObject(key);
-            if (returned != null) {
-                this.findQuads((JSONObject) returned);
-            }
-        }
-    }
+	    //First, we add a wildcard box
+	    Set<Integer> keySet = boxes.keySet();
+	    Quad quad;
+	    for (Integer key : keySet) {
+		boxes.put(key + 1, WILDCARD);
 
-    private void findQuads(JSONArray jsonArray) {
+		//Then we create the two quads.
+		quad = new Quad(key, WILDCARD, key + 1, key + 1);
+		quads.add(quad);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            Object returned;
-
-            returned = jsonArray.optJSONArray(i);
-            if (returned != null) {
-                this.findQuads((JSONArray) returned);
-            }
-
-            returned = jsonArray.optJSONObject(i);
-            if (returned != null) {
-                this.findQuads((JSONObject) returned);
-            }
-        }
+		quad = new Quad(key + 1, WILDCARD, key, key);
+		quads.add(quad);
+	    }
+	}
     }
 }
