@@ -19,39 +19,40 @@ public class Main {
     private static String PROPERTIES_FILE = "mediator.properties";
 
     /**
-     * Read the settings from the properties file, create a <code>URI</code> and return it
-     * @return URI The URI the webservice is bound to 
+     * Read the settings from the properties file, create a
+     * <code>URI</code> and return it
+     *
+     * @return URI The URI the webservice is bound to
      */
     private static URI getBaseURI() {
 
-        URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
+	URL url = Main.class.getProtectionDomain().getCodeSource().getLocation();
 
-        Properties configFile = new Properties();
-        try {
-            configFile.load(new FileReader(url.getPath() + PROPERTIES_FILE));
-        }
-        catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            configFile.setProperty("FROM_URI", "http://localhost/");
-            configFile.setProperty("PORT", "9998");
-        }
+	Properties configFile = new Properties();
+	try {
+	    configFile.load(new FileReader(url.getPath() + PROPERTIES_FILE));
+	} catch (IOException ex) {
+	    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+	    configFile.setProperty("FROM_URI", "http://localhost/");
+	    configFile.setProperty("PORT", "9998");
+	}
 
-        return UriBuilder.fromUri(configFile.getProperty("FROM_URI")).port(Integer.parseInt(configFile.getProperty("PORT"))).build();
+	return UriBuilder.fromUri(configFile.getProperty("FROM_URI")).port(Integer.parseInt(configFile.getProperty("PORT"))).build();
     }
     public static final URI BASE_URI = getBaseURI();
 
     protected static HttpServer startServer() throws IOException {
-        System.out.println("Starting grizzly...");
-        ResourceConfig rc = new PackagesResourceConfig("nl.ru.cs.phasar.mediator.resource");
-        return GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
+	System.out.println("Starting grizzly...");
+	ResourceConfig rc = new PackagesResourceConfig("nl.ru.cs.phasar.mediator.resource");
+	return GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
     }
 
     public static void main(String[] args) throws IOException {
-        HttpServer httpServer = startServer();
-        System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nTry out %smediator\nHit enter to stop it...",
-                BASE_URI, BASE_URI));
-        System.in.read();
-        httpServer.stop();
+	HttpServer httpServer = startServer();
+	System.out.println(String.format("Jersey app started with WADL available at "
+		+ "%sapplication.wadl\nTry out %smediator\nHit enter to stop it...",
+		BASE_URI, BASE_URI));
+	System.in.read();
+	httpServer.stop();
     }
 }

@@ -10,15 +10,15 @@ import org.json.JSONException;
  *
  * @author bartvz <bvanzeeland at gmail dot com>
  */
-@Path("/mediator/query/suggestion/b")
+//@Path("/mediator/query/suggestion/b")
 public class BSuggestionResource extends AbstractSuggestionResource {
 
     public BSuggestionResource() {
         super();
     }
 
-    @POST
-    @Produces("application/json")
+    //@POST
+    //@Produces("application/json")
     public Response getSuggestion(String json) throws JSONException {
         //List<Hit> newHits = super.getNewHits(json);
         return Response.ok("{\"options\":{\"one\",\"two\",\"three\"}}").header("Access-Control-Allow-Origin", "*").build();

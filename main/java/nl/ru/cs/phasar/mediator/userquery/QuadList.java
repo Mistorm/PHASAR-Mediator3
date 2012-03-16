@@ -1,11 +1,6 @@
 package nl.ru.cs.phasar.mediator.userquery;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.ru.cs.phasar.mediator.documentsource.Triple;
@@ -42,9 +37,7 @@ public class QuadList {
 
 	//Print the list of triples
 	for (int j = 0; j < triples.size(); j++) {
-
 	    System.out.println("Triple: " + triples.get(j).getGroundHead() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundTail());
-
 	}
 
 	return triples;
@@ -59,6 +52,14 @@ public class QuadList {
 	    this.findQuads(jsonObject);
 	} catch (JSONException ex) {
 	    Logger.getLogger(Quad.class.getName()).log(Level.SEVERE, null, ex);
+	}
+    }
+    
+    public void buildQuads(JSONObject json){
+	try {
+	    this.findQuads(json);
+	} catch (JSONException ex) {
+	    Logger.getLogger(QuadList.class.getName()).log(Level.SEVERE, null, ex);
 	}
     }
 
@@ -111,5 +112,25 @@ public class QuadList {
 		quads.add(quad);
 	    }
 	}
+    }
+    
+    public List<Quad> getQuadList(){
+	return quads;
+    }
+    
+    public void setQuadList(List<Quad> quadList){
+	this.quads = quadList;
+    }
+
+    public HashMap<Integer, String> getBoxes(){
+	return this.boxes;
+    }
+    
+    public void setBoxContent(Integer boxId, String content){
+	boxes.put(boxId, content);
+    }
+    
+    public String getBoxContent(Integer boxId) {
+	return boxes.get(boxId);
     }
 }

@@ -15,15 +15,15 @@ import org.json.JSONObject;
  *
  * @author bartvz <bvanzeeland at gmail dot com>
  */
-@Path("/mediator/query/suggestion/box")
+//@Path("/mediator/query/suggestion/box")
 public class BoxSuggestionResource extends AbstractSuggestionResource {
 
     public BoxSuggestionResource() {
         super();
     }
 
-    @POST
-    @Produces("application/json")
+    //@POST
+    //@Produces("application/json")
     public Response getSuggestion(String json) throws JSONException {
         
         //Get & resolve the query

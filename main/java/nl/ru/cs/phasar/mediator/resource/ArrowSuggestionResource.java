@@ -15,33 +15,35 @@ import org.json.JSONObject;
  *
  * @author bartvz <bvanzeeland at gmail dot com>
  */
-@Path("/mediator/query/suggestion/arrow")
+//@Path("/mediator/query/suggestion/arrow")
 public class ArrowSuggestionResource extends AbstractSuggestionResource {
 
     public ArrowSuggestionResource() {
         super();
     }
 
-    @POST
-    @Produces("application/json")
+    //@POST
+    //@Produces("application/json")
     public Response getSuggestion(String json) throws JSONException {
 
         JSONObject object = new JSONObject(json);
-        JSONObject baseQuery = object.getJSONObject("baseQuery");
-        JSONObject extention = object.getJSONObject("extension");
+        JSONObject jsonQuery = object.getJSONObject("query");
+        JSONObject arrow = object.getJSONObject("arrow");
 
-        System.out.println("baseQuery:" + baseQuery.toString());
-        System.out.println("extention:" + extention.toString());
+        System.out.println(this.getClass().toString() + " query: " + jsonQuery.toString());
+        System.out.println(this.getClass().toString() + " arrow: " + arrow.toString());
 
-        Query query = super.getResult(baseQuery.toString());
+        Query query = super.getResult(jsonQuery.toString());
 
-        Triple triple = new Triple(extention.getString("a"), extention.getString("relator"), extention.getString("b"), extention.getString("direction"));
+        Triple triple = new Triple(arrow.getString("a"), arrow.getString("relator"), arrow.getString("b"), arrow.getString("direction"));
 
+	System.out.println(this.getClass().toString() + " Filter triple: " + triple.toString()) ;
+	
         List<SuggestionItem> suggestionList = query.getSuggestion(triple, "relator");
 
         JSONObject returned = new JSONObject();
 
-        JSONObject suggestion = new JSONObject();
+        JSONObject suggestion;
 
         suggestion = new JSONObject();
         suggestion.put("value", WILDCARD);
