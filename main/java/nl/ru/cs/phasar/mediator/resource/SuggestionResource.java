@@ -148,6 +148,8 @@ public class SuggestionResource {
 	//Filter the matches so they ONLY contain triples that match the filter triples.
 	List<Triple> matches = new ArrayList<Triple>();
 
+	//TODO: walk thought results's tripple's per match triple and take care if we are looking for the head or tail value.
+	//afterwards, return the matches existing in both the lists.
 	boolean match = true;
 	for (Result r : resultList) {
 	    for (Triple t : r.getTriples()) {

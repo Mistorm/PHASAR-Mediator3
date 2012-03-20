@@ -80,25 +80,28 @@ public class ServerQueryResolver implements DocumentSource {
 
 	bootstrap.releaseExternalResources();
 
-	for (Returnable r : returnables) {
+	if (!returnables.contains(null)) {
 
-	    if (r != null && r.getClass().equals(Sents.class)) {
-		Sents sents = (Sents) r;
-		System.out.println("Returnable is a Sents object, proccesing...");
+	    for (Returnable r : returnables) {
 
-		resultList = new ArrayList<Result>();
+		if (r != null && r.getClass().equals(Sents.class)) {
+		    Sents sents = (Sents) r;
+		    System.out.println("Returnable is a Sents object, proccesing...");
 
-		for (Sent s : sents) {
+		    resultList = new ArrayList<Result>();
 
-		    result = new Result(s.getSentence());
-		    Triples resultTriples = s.getTriples();
+		    for (Sent s : sents) {
 
-		    for (Triple t : resultTriples) {
-			result.addTriple(new nl.ru.cs.phasar.mediator.documentsource.Triple(t.getLeft().toString(), t.getMiddle().toString(), t.getRight().toString(), t.getRight().toString()));
+			result = new Result(s.getSentence());
+			Triples resultTriples = s.getTriples();
+
+			for (Triple t : resultTriples) {
+			    result.addTriple(new nl.ru.cs.phasar.mediator.documentsource.Triple(t.getLeft().toString(), t.getMiddle().toString(), t.getRight().toString(), t.getRight().toString()));
+			}
+			resultList.add(result);
 		    }
-		    resultList.add(result);
+		    resultLists.add(resultList);
 		}
-		resultLists.add(resultList);
 	    }
 	}
 
