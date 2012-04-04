@@ -13,23 +13,23 @@ import org.json.JSONObject;
  * @author bartvz
  */
 public class QuadList {
-
+    
     private HashMap<Integer, String> boxes;
     private List<Quad> quads;
     private static String WILDCARD = "*";
-
+    
     public QuadList() {
 	boxes = new HashMap<Integer, String>();
 	quads = new ArrayList<Quad>();
     }
-
+    
     public List<Triple> getTriples() {
-
+	
 	Quad quad;
 	List<Triple> triples = new ArrayList();
-
+	
 	Iterator i = quads.iterator();
-
+	
 	while (i.hasNext()) {
 	    quad = (Quad) i.next();
 	    triples.add(new Triple(quad.toTriple(boxes)));
@@ -39,14 +39,14 @@ public class QuadList {
 	for (int j = 0; j < triples.size(); j++) {
 	    System.out.println("Triple: " + triples.get(j).getGroundHead() + " " + triples.get(j).getRelator() + " " + triples.get(j).getGroundTail());
 	}
-
+	
 	return triples;
     }
-
+    
     public void buildQuads(String json) {
-
+	
 	JSONObject jsonObject = null;
-
+	
 	try {
 	    jsonObject = new JSONObject(json);
 	    this.findQuads(jsonObject);
@@ -55,34 +55,34 @@ public class QuadList {
 	}
     }
     
-    public void buildQuads(JSONObject json){
+    public void buildQuads(JSONObject json) {
 	try {
 	    this.findQuads(json);
 	} catch (JSONException ex) {
 	    Logger.getLogger(QuadList.class.getName()).log(Level.SEVERE, null, ex);
 	}
     }
-
+    
     private void findQuads(JSONObject jsonObject) throws JSONException {
-
+	
 	int i;
 	Integer boxCount = 0;
 	Integer arrowCount = 0;
-
+	
 	if (jsonObject.has("boxes")) {
 	    JSONArray jsonBoxes = jsonObject.getJSONArray("boxes");
 	    boxCount = jsonBoxes.length();
-
+	    
 	    for (i = 0; i < boxCount; i++) {
 		JSONObject box = jsonBoxes.getJSONObject(i);
 		boxes.put(box.getInt("nr"), box.getString("content"));
 	    }
 	}
-
+	
 	if (jsonObject.has("arrows")) {
 	    JSONArray jsonArrows = jsonObject.getJSONArray("arrows");
 	    arrowCount = jsonArrows.length();
-
+	    
 	    for (i = 0; i < arrowCount; i++) {
 		JSONObject arrow = jsonArrows.getJSONObject(i);
 		Quad quad = new Quad(
@@ -107,30 +107,51 @@ public class QuadList {
 		//Then we create the two quads.
 		quad = new Quad(key, WILDCARD, key + 1, key + 1);
 		quads.add(quad);
-
+		
 		quad = new Quad(key + 1, WILDCARD, key, key);
 		quads.add(quad);
 	    }
 	}
     }
     
-    public List<Quad> getQuadList(){
+    public List<Quad> getQuadList() {
 	return quads;
     }
     
-    public void setQuadList(List<Quad> quadList){
+    public void setQuadList(List<Quad> quadList) {
 	this.quads = quadList;
     }
-
-    public HashMap<Integer, String> getBoxes(){
+    
+    public HashMap<Integer, String> getBoxes() {
 	return this.boxes;
     }
     
-    public void setBoxContent(Integer boxId, String content){
+    public void setBoxContent(Integer boxId, String content) {
 	boxes.put(boxId, content);
     }
     
     public String getBoxContent(Integer boxId) {
 	return boxes.get(boxId);
+    }
+    
+    public void setRelatorContent(Integer a, Integer b, Integer direction, String wildcard) {
+	for (Quad quad : quads) {
+	    if (quad.getA().equals(a) && quad.getB().equals(b) && quad.getDirection().equals(direction)) {
+		quad.setRelator(wildcard);
+	    }
+	}
+    }
+    
+    public List<Quad> getQuadsByboxNr(int boxNr) {
+	
+	List<Quad> foundQuads = new ArrayList<Quad>();
+	
+	for (Quad quad : quads) {
+	    if (quad.getA() == boxNr || quad.getB() == boxNr) {
+		foundQuads.add(quad);
+	    }
+	}
+	
+	return foundQuads;
     }
 }

@@ -25,10 +25,10 @@ public class Quad {
 	return this.direction;
     }
 
-    public void setRelator(String relator){
+    public void setRelator(String relator) {
 	this.relator = relator;
     }
-    
+
     public String getRelator() {
 	return this.relator;
     }
@@ -39,6 +39,19 @@ public class Quad {
 
     public Integer getB() {
 	return this.b;
+    }
+
+    public String getPosition(Integer boxNr) {
+
+	if (this.a == boxNr || this.b == boxNr) {
+	    if (boxNr == this.direction) {
+		return "tail";
+	    } else {
+		return "head";
+	    }
+	}
+
+	return null;
     }
 
     public String[] toTriple(HashMap<Integer, String> boxes) {
@@ -55,5 +68,5 @@ public class Quad {
 	}
 
 	return triple;
-    }    
+    }
 }
