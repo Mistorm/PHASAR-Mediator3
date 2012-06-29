@@ -1,0 +1,35 @@
+#### ReadMe for Mediator 3 ####
+
+INTRO:
+Mediator 3 is part of PHASAR and works with the Dungeons & Dragons interface and the Twistinator server. The mediator was written by 
+Bart van Zeeland during his final internship at the Raboud university.  It accepts queries from a 
+client in JSON format and convert the queries to something the server can handle. It sends this server query, transforms the answer 
+and sends it back in JSON format to the client. The mediator allows for two kinds of JSON requests: a normal query and a suggestion 
+request.
+When it receives a normal request, the mediator only transforms the query and reformats the result. A suggestion 
+request is a more complex opperation: upon receivinf, the mediator wil send out two queries to the server, compare the result, calculate 
+the number of times a hit is generated and send the result back in JSON format.
+
+JSON EXAMPLES:
+
+Normal query: {"boxes":[{"nr":"0", "content":"bank"},{"nr":"1", "content":"nederlandsche"},{"nr":"4", "content":"worden"}], "arrows":[{"a":"0", "relator":"ATTR", "b":"1", "direction":"1"},{"a":"0", "relator":"SUBJ", "b":"4", "direction":"4"}]}
+Normal answer: "result":[{"content":"Uit processtukken rond de afwikkeling van de kwestie blijkt dat De Nederlandsche Bank jarenlang door de top van CLBN een rad voor ogen werd gedraaid.","triples":["MEN SUBJ draaien","afwikkeling PREPvan kwestie","bank ATTR nederlandsche","bank SUBJ worden","draaien PREPuit processtukken","processtukken PREPrond afwikkeling","rad PREPvoor ogen","top PREPvan CLBN","worden MOD jarenlang","worden PRED rad","worden PREPdoor top"]}]}
+
+Suggestion Request: {"query":{"boxes":[{"nr":"0", "content":"bank"},{"nr":"1", "content":"nederlandsche"},], "arrows":[{"a":"0", "relator":"ATTR", "b":"1", "direction":"1"},]},"box":{"nr":"1", "content":"nederlandsche"}}
+Suggestion Answer: {"suggestion":[{"count":"*","value":"*"},{"count":55,"value":"centrale"},{"count":26,"value":"nederlandsche"},{"count":16,"value":"europese"},{"count":10,"value":"duitse"},{"count":5,"value":"toekomstige"},{"count":4,"value":"britse"},{"count":3,"value":"andere"},{"count":2,"value":"zwitserse"},{"count":2,"value":"toezichthoudende"},{"count":2,"value":"onafhankelijke"},{"count":2,"value":"nieuwe"},{"count":2,"value":"middelgrote"},{"count":2,"value":"japanse"},{"count":2,"value":"grootste"},{"count":2,"value":"generale"},{"count":2,"value":"belgische"},{"count":1,"value":"zat"},{"count":1,"value":"vierde"},{"count":1,"value":"regionale"},{"count":1,"value":"overkoepelende"},{"count":1,"value":"nederlandse"},{"count":1,"value":"nauwlettend"},{"count":1,"value":"lokale"},{"count":1,"value":"komende"},{"count":1,"value":"gemeenschappelijke"},{"count":1,"value":"franse"},{"count":1,"value":"enige"},{"count":1,"value":"ene"},{"count":1,"value":"eerste"},{"count":1,"value":"bekende"},{"count":1,"value":"bekend"},{"count":1,"value":"amerikaanse"}]}
+
+
+IMPORTAINT NOTICES:
+- The internal framework of the mediator supports the adding of a cache in two places though this is currently not implemented. There 
+are even mockup classes of the caches in use.
+- The mediator uses a few frameworks to provide a web based JSON api and acces to the server (Twistinator). To compile the software, 
+a Maven build is recommended for easy dependency handeling. An example pom.xml Maven configuration file can be found in the 
+repository. The mediator was build using a Maven project in Netbeans.
+- The mediator uses classes from the Twistinator server to communicate with the server. Since the default Twistinator isn't build 
+using Maven and Netbeans doesn't allow non-Maven imports in a Maven project, a Maven based port was made. The pom.xml file for this 
+build is also included in the mediator repository (twistinator.pom.example).
+- The server must in order tp preform the mediator unit tests. Some of the unit tests may fail due to a mismatch between the data in the server and a the answer the test expects. 
+- The mediator logs information when handeling a query, this may be usefull when debugging.
+
+MORE INFORMATION:
+Look at the additional documentation for more info about the architecture of the Mediator.
